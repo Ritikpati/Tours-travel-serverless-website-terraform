@@ -27,7 +27,15 @@ jobs:
 
       - name: Terraform init
         working-directory: terraform
-        run: terraform init -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}"
+        env:
+          TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
+        run: |
+          if [ -n "$TF_STATE_BUCKET" ]; then
+            terraform init -backend-config="bucket=$TF_STATE_BUCKET"
+          else
+            # Variable not set -> use the bucket hardcoded in terraform/backend.tf
+            terraform init
+          fi
 
       - name: Terraform validate
         working-directory: terraform
