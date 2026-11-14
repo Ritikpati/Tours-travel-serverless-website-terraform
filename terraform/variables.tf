@@ -6,7 +6,7 @@ variable "prefix" {
   default     = "tf"
 }
 variable "zone_name" {
-  default = "288839812643.realhandsonlabs.net"
+  default = "215726090298.realhandsonlabs.net"
 }
 variable "subdomain" {
   default = "tours-tf"
