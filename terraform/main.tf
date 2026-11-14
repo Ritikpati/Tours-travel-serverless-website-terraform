@@ -14,7 +14,8 @@ provider "aws" {
 
 data "aws_caller_identity" "me" {}
 data "aws_route53_zone" "z" {
-  zone_id = var.zone_name.id
+  name         = trimspace(var.zone_name)
+  private_zone = false
 }
 data "aws_cloudfront_cache_policy" "disabled" {
   name = "Managed-CachingDisabled"
