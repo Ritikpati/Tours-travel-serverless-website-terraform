@@ -5,13 +5,7 @@ terraform {
     archive = { source = "hashicorp/archive", version = "~> 2.4" }
     random  = { source = "hashicorp/random", version = "~> 3.6" }
   }
-  backend "s3" {
-    # bucket is passed at init time (-backend-config)
-     bucket       = "tours-tfstate-267259336308"
-    key          = "tours/terraform.tfstate"
-    region       = "us-east-1"
-    use_lockfile = true
-  }
+ 
 }
 
 provider "aws" {
