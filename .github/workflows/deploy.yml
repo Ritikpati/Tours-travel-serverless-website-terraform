@@ -1,0 +1,54 @@
+name: Deploy Tours and Travels
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      TF_VAR_upi_id: ${{ secrets.UPI_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (access key + secret key)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: us-east-1
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.10.5
+          terraform_wrapper: false
+
+      - name: Terraform init
+        working-directory: terraform
+        run: terraform init -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}"
+
+      - name: Terraform validate
+        working-directory: terraform
+        run: terraform validate
+
+      - name: Terraform apply
+        working-directory: terraform
+        run: terraform apply -auto-approve
+
+      - name: Upload websites
+        working-directory: terraform
+        run: |
+          TR='const TR = { Flight: 5000, Bus: 1500, Transport: 2500 };'
+          printf 'const API = "%s";\n%s\n' "$(terraform output -raw user_api_url)"  "$TR" > ../user-site/config.js
+          printf 'const API = "%s";\n%s\n' "$(terraform output -raw admin_api_url)" "$TR" > ../admin-site/config.js
+          aws s3 sync ../user-site  "s3://$(terraform output -raw user_bucket)"  --delete
+          aws s3 sync ../admin-site "s3://$(terraform output -raw admin_bucket)" --delete
+
+      - name: Show URLs
+        working-directory: terraform
+        run: |
+          echo "User site : $(terraform output -raw user_url)"
+          echo "Admin site: $(terraform output -raw admin_url)"

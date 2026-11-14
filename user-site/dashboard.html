@@ -1,0 +1,143 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My Trips – Tours & Travels</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css"></head><body>
+
+<nav class="nav solid"><div class="wrap">
+ <a class="logo" href="index.html">✈️ Tours &amp; Travels</a>
+ <div class="r"><span id="who"></span><button class="btn-o" onclick="logout()">Logout</button></div>
+</div></nav>
+
+<header class="dhead"><div class="wrap"><h1 id="hi">Where to next?</h1><p>Choose a package, pay with QR and your booking is confirmed.</p></div></header>
+
+<main class="wrap" style="padding-bottom:40px">
+ <div class="tabs"><button id="t-pk" class="on" onclick="show('pk')">🧳 Tour Packages</button><button id="t-bk" onclick="show('bk')">📋 My Bookings</button></div>
+
+ <section id="pk">
+  <div class="bar"><input class="fi" id="q" placeholder="🔍 Search destination or package" oninput="render()">
+   <select class="fi" id="sort" style="max-width:220px;margin:0" onchange="render()"><option value="">Sort: Recommended</option><option value="low">Price: low to high</option><option value="high">Price: high to low</option><option value="days">Shortest trip</option></select></div>
+  <div class="grid" id="pkgs"><p class="empty">Loading packages…</p></div>
+ </section>
+
+ <section id="bk" hidden>
+  <div id="bks"></div>
+  <div class="policy"><b>Cancellation policy:</b> 10 days or more before departure – 80% refund · 5 to 9 days – 10% refund · less than 5 days – no refund.</div>
+ </section>
+</main>
+
+<div id="modal" class="modal" hidden><div class="box">
+ <div id="s1">
+  <div class="hd"><button class="x" onclick="closeM()">✕</button><h3 id="bn">Booking details</h3><p id="bd"></p></div>
+  <div class="bd">
+   <label class="l">Travel by</label>
+   <div class="pills" id="pills">
+    <button class="on" data-t="Flight" onclick="setTr('Flight')"><span>✈️</span>Flight</button>
+    <button data-t="Bus" onclick="setTr('Bus')"><span>🚌</span>Bus</button>
+    <button data-t="Transport" onclick="setTr('Transport')"><span>🚖</span>Transport</button>
+   </div>
+   <label class="l">Departure date</label><input class="fi" type="date" id="dt">
+   <label class="l">Number of members</label><input class="fi" type="number" id="mem" min="1" value="1" oninput="calc()">
+   <div class="line"><span>Package (per person)</span><span id="l1"></span></div>
+   <div class="line"><span id="l2n">Travel</span><span id="l2"></span></div>
+   <div class="line t"><span>Total amount</span><span class="amt" id="tot"></span></div>
+   <div class="mini">Cancellation: 10+ days before 80% refund · 5–9 days 10% · under 5 days none.</div>
+   <button class="btn full" onclick="payNow()">Pay with QR</button>
+  </div>
+ </div>
+ <div id="s2" hidden>
+  <div class="hd"><button class="x" onclick="closeM()">✕</button><h3>Scan &amp; pay</h3><p>Use any UPI app</p></div>
+  <div class="bd ctr"><div id="qrcode"></div><p>Amount to pay: <b class="amt" id="qa"></b></p><br>
+   <button class="btn full" onclick="paid()">I have paid</button></div>
+ </div>
+ <div id="s3" hidden>
+  <div class="bd ctr" style="padding-top:34px"><div class="ok">✔</div><h3>Booking confirmed!</h3>
+   <p style="color:var(--muted);margin:6px 0 4px">Your booking ID</p><p style="font-size:20px;font-weight:600" id="bid"></p><br>
+   <button class="btn full" onclick="closeM();show('bk')">View my bookings</button></div>
+ </div>
+</div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="config.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const tok=localStorage.token; if(!tok) location="index.html";
+$("who").textContent=localStorage.name||"";
+$("hi").textContent="Hi "+(localStorage.name||"traveller")+", where to next?";
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";");
+const inr=n=>"₹"+Number(n||0).toLocaleString("en-IN");
+function logout(){localStorage.clear();location="index.html"}
+async function call(m,p,b){
+  const r=await fetch(API+p,{method:m,headers:{"Content-Type":"application/json",Authorization:"Bearer "+tok},body:b?JSON.stringify(b):undefined});
+  const d=await r.json();
+  if(r.status===401){logout();return}
+  if(!r.ok) throw new Error(d.error||"Error"); return d;
+}
+function show(id){
+  $("pk").hidden=id!=="pk";$("bk").hidden=id!=="bk";
+  $("t-pk").classList.toggle("on",id==="pk");$("t-bk").classList.toggle("on",id==="bk");
+  if(id==="bk") loadBookings();
+}
+let P=[],view=[],cur,bookingId,tr="Flight";
+
+async function loadPkgs(){
+  try{P=await call("GET","/packages")||[]}catch(e){$("pkgs").innerHTML="<p class='empty'>Could not load packages.</p>";return}
+  const q=new URLSearchParams(location.search).get("q"); if(q) $("q").value=q;
+  render();
+}
+function render(){
+  const q=$("q").value.trim().toLowerCase(),s=$("sort").value;
+  view=P.filter(p=>(p.name+" "+p.destination).toLowerCase().includes(q));
+  if(s==="low")view.sort((a,b)=>a.price-b.price);
+  else if(s==="high")view.sort((a,b)=>b.price-a.price);
+  else if(s==="days")view.sort((a,b)=>a.days-b.days);
+  $("pkgs").innerHTML=view.length?view.map((p,i)=>`<div class="card">
+    <div class="img"><span>${esc(p.destination)}</span>${p.image?`<img src="${esc(p.image)}" alt="" loading="lazy" onerror="this.remove()">`:""}
+     <span class="badge">${esc(p.days)} days</span>
+     <div class="pricechip"><small>from</small><b>${inr(p.price)}</b><small>per person</small></div></div>
+    <div class="in"><h3>${esc(p.name)}</h3><div class="loc">📍 ${esc(p.destination)}</div>
+     <div class="feat"><span>✈️ Flight</span><span>🚌 Bus</span><span>🚖 Transport</span></div>
+     <button class="btn" onclick="openBook(${i})">Book now</button></div></div>`).join(""):"<p class='empty'>No packages match your search.</p>";
+}
+function setTr(t){tr=t;document.querySelectorAll("#pills button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));calc()}
+function openBook(i){
+  cur=view[i];$("bn").textContent=cur.name;$("bd").textContent="📍 "+cur.destination+" · "+cur.days+" days";
+  const d=new Date();d.setDate(d.getDate()+1);$("dt").min=d.toISOString().slice(0,10);$("dt").value="";
+  $("mem").value=1;setTr("Flight");
+  $("s1").hidden=false;$("s2").hidden=true;$("s3").hidden=true;$("modal").hidden=false;
+}
+function closeM(){$("modal").hidden=true}
+function calc(){
+  const m=Math.max(1,parseInt($("mem").value)||1);
+  $("l1").textContent=inr(cur.price)+" × "+m;
+  $("l2n").textContent=tr+" (per person)";$("l2").textContent=inr(TR[tr])+" × "+m;
+  $("tot").textContent=inr((cur.price+TR[tr])*m);
+}
+async function payNow(){
+  if(!$("dt").value) return alert("Please select the travel date");
+  try{
+    const d=await call("POST","/book",{packageId:cur.packageId,transport:tr,date:$("dt").value,members:parseInt($("mem").value)||1});
+    bookingId=d.bookingId;$("qa").textContent=inr(d.amount);
+    $("qrcode").innerHTML="";new QRCode($("qrcode"),{text:d.upi,width:200,height:200});
+    $("s1").hidden=true;$("s2").hidden=false;
+  }catch(e){alert(e.message)}
+}
+async function paid(){
+  try{await call("POST","/pay",{bookingId});$("bid").textContent=bookingId;$("s2").hidden=true;$("s3").hidden=false}
+  catch(e){alert(e.message)}
+}
+const LBL={CONFIRMED:"Confirmed",CANCELLED:"Cancelled",PENDING_PAYMENT:"Pending"};
+async function loadBookings(){
+  const b=await call("GET","/mybookings")||[];
+  $("bks").innerHTML=b.length?`<div class="tw"><table><tr><th>Booking ID</th><th>Destination</th><th>Travel</th><th>Date</th><th>Members</th><th>Amount</th><th>Status</th><th></th></tr>`+
+   b.map(x=>`<tr><td>${esc(x.bookingId)}</td><td>${esc(x.destination)}</td><td>${esc(x.transport)}</td><td>${esc(x.date)}</td><td>${esc(x.members)}</td><td>${inr(x.amount)}</td>
+   <td><span class="st ${LBL[x.status]||""}">${LBL[x.status]||esc(x.status)}</span>${x.status==="CANCELLED"?" Refund "+inr(x.refund):""}</td>
+   <td>${x.status==="CONFIRMED"?`<button class="btn-r" onclick="cancelB('${esc(x.bookingId)}')">Cancel</button>`:""}</td></tr>`).join("")+"</table></div>":"<p class='empty'>No bookings yet. Pick a package to get started.</p>";
+}
+async function cancelB(id){
+  if(!confirm("Cancel this booking?\n10+ days before: 80% refund\n5–9 days before: 10% refund\nLess than 5 days: no refund")) return;
+  try{const d=await call("POST","/cancel",{bookingId:id});alert("Cancelled. Refund: "+d.percent+"% = "+inr(d.refund));loadBookings()}
+  catch(e){alert(e.message)}
+}
+loadPkgs();
+</script></body></html>

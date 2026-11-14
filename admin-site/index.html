@@ -1,0 +1,23 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin – Tours & Travels</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css"></head><body>
+<div class="lp">
+ <div class="top"><b>🛠 Tours &amp; Travels · Admin</b><button onclick="document.getElementById('lg').hidden=false">Admin Login</button></div>
+ <div class="mid"><h1>Admin Control Center</h1><p>Track registrations, bookings and payments, and manage tour packages in one place.</p>
+  <div class="chips"><span>👥 Users</span><span>🧳 Packages</span><span>💳 Payments</span><span>📊 Live reports</span></div></div>
+</div>
+<div id="lg" class="modal" hidden><div class="box"><h3>Admin login</h3><p class="s">Sign in to open the dashboard</p>
+ <label>Username</label><input id="u" placeholder="Username" autocomplete="username">
+ <label>Password</label><input id="p" type="password" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()">
+ <button class="btn" style="width:100%;margin-top:6px" onclick="login()">Login</button>
+ <p style="text-align:center;margin-top:12px"><button class="btn-g" onclick="document.getElementById('lg').hidden=true">Cancel</button></p></div></div>
+<script src="config.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+async function login(){
+  const r=await fetch(API+"/admin/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:$("u").value,password:$("p").value})});
+  const d=await r.json(); if(!r.ok) return alert(d.error);
+  localStorage.atoken=d.token; location="dashboard.html";
+}
+</script></body></html>

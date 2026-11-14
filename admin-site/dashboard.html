@@ -1,0 +1,160 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Dashboard – Tours & Travels</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css"></head><body>
+<div class="app">
+<aside><h3>🛠 Admin Panel</h3>
+ <a id="m-dash" class="on" onclick="go('dash')">📊 Dashboard</a>
+ <a id="m-pkgs" onclick="go('pkgs')">🧳 Packages</a>
+ <a id="m-book" onclick="go('book')">📋 Bookings</a>
+ <a id="m-pay" onclick="go('pay')">💳 Payments</a>
+ <a id="m-users" onclick="go('users')">👥 Users</a>
+ <a id="m-add" onclick="go('add')">➕ Add Package</a>
+ <a onclick="logout()">🚪 Logout</a>
+</aside>
+<div class="main">
+
+<div class="head"><div><h2 id="ttl">Dashboard</h2><small>All data from users, packages, bookings and payments</small></div>
+ <span class="live"><i></i><span id="upd">Loading…</span></span></div>
+
+<section id="dash">
+ <div class="stats">
+  <div class="stat" style="--c:#16a870"><div class="ic">💰</div><small>Net revenue</small><b id="st1"></b><em id="st1b"></em></div>
+  <div class="stat" style="--c:#2f6bff"><div class="ic">📋</div><small>Bookings</small><b id="st2"></b><em id="st2b"></em></div>
+  <div class="stat" style="--c:#ff8a3d"><div class="ic">👥</div><small>Registered users</small><b id="st3"></b><em>Signed up so far</em></div>
+  <div class="stat" style="--c:#7c5cff"><div class="ic">🧳</div><small>Packages</small><b id="st4"></b><em>Live on the website</em></div>
+ </div>
+ <div class="cols">
+  <div class="panel"><div class="ph"><h3>Revenue by destination</h3></div><div class="bars" id="bars"></div></div>
+  <div class="panel"><div class="ph"><h3>Recent activity</h3></div><div class="feed" id="feed"></div></div>
+ </div>
+ <div class="panel"><div class="ph"><h3>Manage packages</h3><div><button class="g" onclick="go('add')">+ Add</button> <button class="r" onclick="delSel()">Delete selected</button></div></div><div class="tw" id="tp1"></div></div>
+</section>
+
+<section id="pkgs" hidden>
+ <div class="panel"><div class="ph"><h3>All packages</h3><div><button class="g" onclick="go('add')">+ Add</button> <button class="r" onclick="delSel()">Delete selected</button></div></div><div class="tw" id="tp2"></div></div>
+</section>
+
+<section id="book" hidden><div class="panel"><div class="ph"><h3>All bookings</h3></div><div class="tw" id="tb"></div></div></section>
+
+<section id="pay" hidden>
+ <div class="panel"><div class="ph"><h3>Add payment</h3></div>
+  <div class="row"><input id="pb" placeholder="Booking ID (optional)"><input id="pe" placeholder="User email"><input id="pa" type="number" placeholder="Amount"><button class="g" onclick="addPay()">Add payment</button></div></div>
+ <div class="panel"><div class="ph"><h3>Payments</h3></div><div class="tw" id="tpay"></div></div>
+</section>
+
+<section id="users" hidden><div class="panel"><div class="ph"><h3>Registered users</h3></div><div class="tw" id="tu"></div></div></section>
+
+<section id="add" hidden>
+ <div class="panel"><div class="ph"><h3>Add a new package</h3></div>
+  <div class="form2">
+   <div><label>Package name</label><input id="pn" placeholder="Goa Beach Tour"></div>
+   <div><label>Destination</label><input id="pd" placeholder="Goa"></div>
+   <div><label>Days</label><input id="pdays" type="number" placeholder="4"></div>
+   <div><label>Price per person (₹)</label><input id="pp" type="number" placeholder="15000"></div>
+   <div class="f"><label>Image URL (optional)</label><input id="pi" placeholder="https://...jpg"></div>
+  </div>
+  <button class="g" onclick="addPkg()">Add package</button></div>
+</section>
+
+</div></div>
+
+<script src="config.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const tok=localStorage.atoken; if(!tok) location="index.html";
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";");
+const inr=n=>"₹"+Number(n||0).toLocaleString("en-IN");
+const when=t=>t?new Date(t).toLocaleString("en-IN",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}):"-";
+function logout(){localStorage.clear();location="index.html"}
+async function call(m,p,b){
+  const r=await fetch(API+p,{method:m,headers:{"Content-Type":"application/json",Authorization:"Bearer "+tok},body:b?JSON.stringify(b):undefined});
+  let d={};try{d=await r.json()}catch(e){}
+  if(r.status===401){logout();return}
+  if(!r.ok) throw new Error(d.error||d.message||("Error "+r.status));
+  return d;
+}
+const SEC=["dash","pkgs","book","pay","users","add"];
+const NAMES={dash:"Dashboard",pkgs:"Packages",book:"Bookings",pay:"Payments",users:"Users",add:"Add Package"};
+function go(id){
+  SEC.forEach(s=>{$(s).hidden=s!==id;const m=$("m-"+s);if(m)m.classList.toggle("on",s===id)});
+  $("ttl").textContent=NAMES[id];
+}
+const table=(h,rows)=>rows.length?`<table><tr>${h.map(x=>`<th>${x}</th>`).join("")}</tr>${rows.join("")}</table>`:"<p class='empty'>No data yet.</p>";
+const tag=s=>`<span class="tag ${esc(s)}">${esc(s)}</span>`;
+
+async function load(silent){
+  let d;
+  try{d=await call("GET","/admin/summary")}catch(e){if(!silent)alert("Could not load data: "+e.message);return}
+  if(!d) return;
+  for(const k of ["users","packages","bookings","payments","packageStats"]) d[k]=d[k]||[];
+  d.totals=d.totals||{confirmed:0,cancelled:0,pending:0};
+  d.totalCollected=d.totalCollected||0; d.totalRefunded=d.totalRefunded||0;
+
+  $("st1").textContent=inr(d.totalCollected-d.totalRefunded);
+  $("st1b").textContent="Collected "+inr(d.totalCollected)+" · Refunded "+inr(d.totalRefunded);
+  $("st2").textContent=d.bookings.length;
+  $("st2b").textContent=d.totals.confirmed+" confirmed · "+d.totals.cancelled+" cancelled · "+d.totals.pending+" pending";
+  $("st3").textContent=d.users.length;$("st4").textContent=d.packages.length;
+
+  const stats=[...d.packageStats].sort((a,b)=>b.revenue-a.revenue).slice(0,7),max=Math.max(1,...stats.map(s=>s.revenue));
+  $("bars").innerHTML=stats.length?stats.map(s=>`<div class="rw"><span>${esc(s.destination)}</span><div class="bg"><div class="fg" style="width:${Math.round(s.revenue/max*100)}%"></div></div><b>${inr(s.revenue)}</b></div>`).join(""):"<p class='empty'>Add packages to see revenue.</p>";
+
+  const feed=[
+   ...d.users.map(u=>({t:u.createdAt,i:"👤",x:`<b>${esc(u.name)}</b> registered`,s:esc(u.email)})),
+   ...d.bookings.map(b=>({t:b.createdAt,i:"🧳",x:`<b>${esc(b.name||b.email)}</b> booked ${esc(b.destination)}`,s:`${esc(b.members)} traveller(s) · ${inr(b.amount)} · ${esc(b.status)}`})),
+   ...d.payments.map(p=>({t:p.paidAt,i:"💳",x:`Payment ${inr(p.amount)} from <b>${esc(p.name||p.email)}</b>`,s:esc(p.status)}))
+  ].sort((a,b)=>String(b.t||"").localeCompare(String(a.t||""))).slice(0,14);
+  $("feed").innerHTML=feed.length?feed.map(f=>`<div class="it"><span class="i">${f.i}</span><div>${f.x}<small>${f.s} · ${when(f.t)}</small></div></div>`).join(""):"<p class='empty'>No activity yet.</p>";
+
+  const pk=table(["","","Package","Destination","Days","Price","Bookings","Action"],d.packages.map(p=>{
+    const st=d.packageStats.find(s=>s.packageId===p.packageId)||{bookings:0};
+    return `<tr><td><input type="checkbox" class="pc" value="${esc(p.packageId)}" style="width:auto;margin:0"></td>
+     <td>${p.image?`<img class="thumb" src="${esc(p.image)}" alt="" onerror="this.remove()">`:`<span class="thumb"></span>`}</td>
+     <td>${esc(p.name)}</td><td>${esc(p.destination)}</td><td>${esc(p.days)}</td><td>${inr(p.price)}</td><td>${st.bookings}</td>
+     <td><button class="r" onclick="delPkg('${esc(p.packageId)}')">Delete</button></td></tr>`}));
+  $("tp1").innerHTML=pk;$("tp2").innerHTML=pk;
+
+  $("tb").innerHTML=table(["Booking ID","Traveller","Phone","Destination","Travel","Date","Members","Amount","Status","Booked on"],d.bookings.map(b=>
+    `<tr><td>${esc(b.bookingId)}</td><td>${esc(b.name||b.email)}<br><small style="color:var(--muted)">${esc(b.email)}</small></td><td>${esc(b.phone)}</td><td>${esc(b.destination)}</td><td>${esc(b.transport)}</td><td>${esc(b.date)}</td><td>${esc(b.members)}</td><td>${inr(b.amount)}</td><td>${tag(b.status)}</td><td>${when(b.createdAt)}</td></tr>`));
+
+  $("tpay").innerHTML=table(["Payment ID","Booking","Traveller","Destination","Amount","Status","Refund","Date",""],d.payments.map(p=>
+    `<tr><td>${esc(p.paymentId)}</td><td>${esc(p.bookingId)}</td><td>${esc(p.name||p.email)}</td><td>${esc(p.destination)}</td><td>${inr(p.amount)}</td><td>${tag(p.status)}</td><td>${p.refund?inr(p.refund):"-"}</td><td>${when(p.paidAt)}</td>
+     <td><button class="r" onclick="delPay('${esc(p.paymentId)}')">Delete</button></td></tr>`));
+
+  $("tu").innerHTML=table(["Name","Email","Phone","Bookings","Total spent","Registered"],d.users.map(u=>
+    `<tr><td>${esc(u.name)}</td><td>${esc(u.email)}</td><td>${esc(u.phone)}</td><td>${u.bookings}</td><td>${inr(u.spent)}</td><td>${when(u.createdAt)}</td></tr>`));
+
+  $("upd").textContent="Live · updated "+new Date().toLocaleTimeString();
+}
+async function addPkg(){
+  try{
+    await call("POST","/admin/package",{name:$("pn").value,destination:$("pd").value,days:$("pdays").value,price:$("pp").value,image:$("pi").value});
+    ["pn","pd","pdays","pp","pi"].forEach(i=>$(i).value="");
+    await load();go("dash");
+  }catch(e){alert(e.message)}
+}
+async function delPkg(id){
+  if(!confirm("Delete this package?")) return;
+  try{await call("DELETE","/admin/package?id="+encodeURIComponent(id));load()}catch(e){alert(e.message)}
+}
+async function delSel(){
+  const ids=[...document.querySelectorAll("section:not([hidden]) .pc:checked")].map(c=>c.value);
+  if(!ids.length) return alert("Tick the packages to delete");
+  if(!confirm("Delete "+ids.length+" package(s)?")) return;
+  try{for(const id of ids) await call("DELETE","/admin/package?id="+encodeURIComponent(id));load()}catch(e){alert(e.message)}
+}
+async function addPay(){
+  try{
+    await call("POST","/admin/payment",{bookingId:$("pb").value,email:$("pe").value,amount:$("pa").value});
+    ["pb","pe","pa"].forEach(i=>$(i).value="");load();
+  }catch(e){alert(e.message)}
+}
+async function delPay(id){
+  if(!confirm("Delete this payment record?")) return;
+  try{await call("DELETE","/admin/payment?id="+encodeURIComponent(id));load()}catch(e){alert(e.message)}
+}
+load();
+// keep every table in sync: refresh all data every 15 seconds (paused while rows are ticked or tab is hidden)
+setInterval(()=>{if(!document.hidden&&!document.querySelector(".pc:checked"))load(true)},15000);
+</script></body></html>

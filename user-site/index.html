@@ -1,0 +1,142 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tours & Travels – Explore the World</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css"></head><body>
+
+<nav class="nav" id="nav"><div class="wrap">
+ <a class="logo" href="#top">✈️ Tours &amp; Travels</a>
+ <div class="menu"><a href="#destinations">Destinations</a><a href="#how">How it works</a><a href="#why">Why us</a><a href="#policy">Cancellation</a></div>
+ <div class="r" id="auth">
+  <button class="btn-o" onclick="openM('reg')">Register</button>
+  <button class="btn" onclick="openM('log')">Login</button>
+ </div>
+</div></nav>
+
+<header class="hero" id="top"><div class="wrap"><div class="in">
+ <span class="pill">🌴 Flights · Buses · Transport · Tour packages</span>
+ <h1>Discover places that <span>stay with you</span></h1>
+ <p class="sub">Handpicked tour packages, simple booking and a quick QR payment. Plan your next trip in minutes.</p>
+ <div class="search">
+  <div><label>Where to?</label><input id="sq" placeholder="Goa, Bali, Dubai..."></div>
+  <div><label>Date</label><input id="sd" type="date"></div>
+  <div><label>Travellers</label><input id="sm" type="number" min="1" value="2"></div>
+  <button class="btn" onclick="findTrip()">Find my trip</button>
+ </div>
+</div></div><div class="scroll-hint">⌄</div></header>
+
+<section class="section" id="destinations"><div class="wrap">
+ <div class="center rv"><span class="tag-s">Popular packages</span><h2 class="title">Choose your next destination</h2>
+ <p class="lead">Every package includes your choice of flight, bus or transport. Login to book.</p></div>
+ <div class="grid" id="pkgs"><p class="empty">Loading packages…</p></div>
+</div></section>
+
+<section class="section alt" id="how"><div class="wrap">
+ <div class="center rv"><span class="tag-s">Simple process</span><h2 class="title">Book in four easy steps</h2></div>
+ <div class="steps rv" style="margin-top:34px">
+  <div class="step"><div class="num">👤</div><h3>Register</h3><p>Create your free account in a few seconds.</p></div>
+  <div class="step"><div class="num">🧳</div><h3>Choose a package</h3><p>Pick a destination, travel mode, date and travellers.</p></div>
+  <div class="step"><div class="num">📱</div><h3>Pay with QR</h3><p>Scan the QR code with any UPI app.</p></div>
+  <div class="step"><div class="num">✅</div><h3>Booking confirmed</h3><p>Get your booking ID instantly and manage it any time.</p></div>
+ </div>
+</div></section>
+
+<section class="section" id="why"><div class="wrap">
+ <div class="center rv"><span class="tag-s">Why travel with us</span><h2 class="title">Everything in one place</h2></div>
+ <div class="feats rv" style="margin-top:34px">
+  <div class="f"><div class="ic">✈️</div><h3>Flights</h3><p>Fly to your destination with a package built around your dates.</p></div>
+  <div class="f"><div class="ic">🚌</div><h3>Bus travel</h3><p>A budget-friendly way to reach nearby getaways.</p></div>
+  <div class="f"><div class="ic">🚖</div><h3>Local transport</h3><p>Pick transport for comfortable travel at your destination.</p></div>
+  <div class="f"><div class="ic">🔒</div><h3>Secure payment</h3><p>Pay with a UPI QR code. Your booking is recorded instantly.</p></div>
+ </div>
+</div></section>
+
+<section class="section alt" id="policy"><div class="wrap">
+ <div class="center rv"><span class="tag-s">Flexible plans</span><h2 class="title">Cancellation policy</h2>
+ <p class="lead">Plans change. Cancel from My Bookings and your refund is calculated automatically.</p></div>
+ <div class="tiers rv">
+  <div class="tier"><b>80%</b><span>refund when you cancel<br>10 or more days before departure</span></div>
+  <div class="tier m"><b>10%</b><span>refund when you cancel<br>5 to 9 days before departure</span></div>
+  <div class="tier n"><b>0%</b><span>no refund when you cancel<br>less than 5 days before departure</span></div>
+ </div>
+</div></section>
+
+<section class="wrap" style="margin-top:90px"><div class="cta rv"><h2>Ready for your next adventure?</h2><p>Create a free account and book your trip today.</p>
+ <button class="btn" onclick="openM('reg')">Get started</button></div></section>
+
+<footer><div class="wrap"><div class="cols">
+ <div><h3>✈️ Tours &amp; Travels</h3><p>Your dream journey awaits.</p></div>
+ <div><h3>Explore</h3><p><a href="#destinations">Destinations</a><br><a href="#how">How it works</a><br><a href="#policy">Cancellation policy</a></p></div>
+</div><small>© Tours &amp; Travels. All rights reserved.</small></div></footer>
+
+<div id="reg" class="modal" hidden><div class="box"><div class="hd"><button class="x" onclick="closeM()">✕</button><h3>Create account</h3><p>Join us and start exploring</p></div><div class="bd">
+ <label class="l">Full name</label><input class="fi" id="rn" placeholder="Your name">
+ <label class="l">Email</label><input class="fi" id="re" type="email" placeholder="you@example.com">
+ <label class="l">Phone</label><input class="fi" id="rp" placeholder="Phone number">
+ <label class="l">Password</label><input class="fi" id="rw" type="password" placeholder="Choose a password">
+ <button class="btn full" onclick="register()">Register</button>
+ <p class="sw">Already have an account? <a onclick="openM('log')">Login</a></p></div></div></div>
+
+<div id="log" class="modal" hidden><div class="box"><div class="hd"><button class="x" onclick="closeM()">✕</button><h3>Welcome back</h3><p id="lmsg">Login to book your trip</p></div><div class="bd">
+ <label class="l">Email</label><input class="fi" id="le" type="email" placeholder="you@example.com">
+ <label class="l">Password</label><input class="fi" id="lw" type="password" placeholder="Your password">
+ <button class="btn full" onclick="login()">Login</button>
+ <p class="sw">New here? <a onclick="openM('reg')">Create an account</a></p></div></div></div>
+
+<script src="config.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";");
+const inr=n=>"₹"+Number(n||0).toLocaleString("en-IN");
+const loggedIn=!!localStorage.token;
+const nav=$("nav");
+addEventListener("scroll",()=>nav.classList.toggle("scrolled",scrollY>40));
+if(loggedIn){$("auth").innerHTML=`<span>Hi, ${esc(localStorage.name||"")}</span><button class="btn" onclick="location='dashboard.html'">My Trips</button>`}
+const t=new Date();t.setDate(t.getDate()+1);$("sd").min=t.toISOString().slice(0,10);
+
+function openM(id,msg){closeM();$(id).hidden=false;if(msg&&id==="log")$("lmsg").textContent=msg}
+function closeM(){$("reg").hidden=true;$("log").hidden=true}
+function gate(q){
+  if(loggedIn){location="dashboard.html"+(q?"?q="+encodeURIComponent(q):"")}
+  else{sessionStorage.q=q||"";openM("log","Please login to book your trip")}
+}
+function findTrip(){gate($("sq").value.trim())}
+
+async function post(path,body){
+  const r=await fetch(API+path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+  const d=await r.json(); if(!r.ok) throw new Error(d.error||"Error"); return d;
+}
+async function register(){
+  try{
+    await post("/register",{name:$("rn").value,email:$("re").value,phone:$("rp").value,password:$("rw").value});
+    alert("Registered! Please login."); $("le").value=$("re").value; openM("log");
+  }catch(e){alert(e.message)}
+}
+async function login(){
+  try{
+    const d=await post("/login",{email:$("le").value,password:$("lw").value});
+    localStorage.token=d.token; localStorage.name=d.name;
+    const q=sessionStorage.q||""; sessionStorage.removeItem("q");
+    location="dashboard.html"+(q?"?q="+encodeURIComponent(q):"");
+  }catch(e){alert(e.message)}
+}
+
+async function loadPkgs(){
+  try{
+    const r=await fetch(API+"/packages"); const P=await r.json();
+    $("pkgs").innerHTML=P.length?P.map(p=>`<div class="card rv">
+      <div class="img"><span>${esc(p.destination)}</span>${p.image?`<img src="${esc(p.image)}" alt="${esc(p.destination)}" loading="lazy" onerror="this.remove()">`:""}
+       <span class="badge">${esc(p.days)} days</span>
+       <div class="pricechip"><small>from</small><b>${inr(p.price)}</b><small>per person</small></div></div>
+      <div class="in"><h3>${esc(p.name)}</h3><div class="loc">📍 ${esc(p.destination)}</div>
+       <div class="feat"><span>✈️ Flight</span><span>🚌 Bus</span><span>🚖 Transport</span></div>
+       <button class="btn" onclick="gate('${esc(p.destination)}')">Book now</button></div></div>`).join(""):"<p class='empty center'>New packages are coming soon.</p>";
+    reveal();
+  }catch(e){$("pkgs").innerHTML="<p class='empty'>Could not load packages right now.</p>"}
+}
+function reveal(){
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in-v");io.unobserve(e.target)}}),{threshold:.12});
+  document.querySelectorAll(".rv:not(.in-v)").forEach(el=>io.observe(el));
+}
+reveal();loadPkgs();
+</script></body></html>
