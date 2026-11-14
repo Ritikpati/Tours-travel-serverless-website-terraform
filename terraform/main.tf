@@ -7,6 +7,7 @@ terraform {
   }
   backend "s3" {
     # bucket is passed at init time (-backend-config)
+     bucket       = "tours-tfstate-267259336308"
     key          = "tours/terraform.tfstate"
     region       = "us-east-1"
     use_lockfile = true
