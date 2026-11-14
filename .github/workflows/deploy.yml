@@ -25,7 +25,7 @@ jobs:
           terraform_version: 1.10.5
           terraform_wrapper: false
 
-      - name: Terraform init --reconfigure
+      - name: Terraform init
         working-directory: terraform
         run: terraform init -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}"
 
