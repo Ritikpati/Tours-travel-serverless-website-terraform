@@ -6,12 +6,10 @@ variable "prefix" {
   default     = "tf"
 }
 variable "zone_name" {
-  description = "Your Route 53 hosted zone"
-  default     = "288839812643.realhandsonlabs.net "
+  default = "288839812643.realhandsonlabs.net"
 }
 variable "subdomain" {
-  description = "User site becomes <subdomain>.<zone_name>"
-  default     = "tours-tf"
+  default = "tours-tf"
 }
 variable "upi_id" {
   default = "yourupi@bank"
