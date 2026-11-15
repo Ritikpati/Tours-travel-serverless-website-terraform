@@ -14,8 +14,18 @@
 </aside>
 <div class="main">
 
-<div class="head"><div><h2 id="ttl">Dashboard</h2><small>All data from users, packages, bookings and payments</small></div>
- <span class="live"><i></i><span id="upd">Loading…</span></span></div>
+<div class="topbar">
+ <div class="tl"><h2 id="ttl">Dashboard</h2><small>All data from users, packages, bookings and payments</small></div>
+ <div class="tr">
+  <span class="live"><i></i><span id="upd">Loading…</span></span>
+  <div class="act">
+   <button class="bell" onclick="toggleAct(event)" title="Recent activity">🔔<b id="nb" hidden>0</b></button>
+   <div class="drop" id="drop" hidden onclick="event.stopPropagation()"><div class="dh">Recent activity</div><div class="feed" id="feed"></div></div>
+  </div>
+  <span class="me">👤 Admin</span>
+  <button class="r" onclick="logout()">Logout</button>
+ </div>
+</div>
 
 <section id="dash">
  <div class="stats">
@@ -24,10 +34,7 @@
   <div class="stat" style="--c:#ff8a3d"><div class="ic">👥</div><small>Registered users</small><b id="st3"></b><em>Signed up so far</em></div>
   <div class="stat" style="--c:#7c5cff"><div class="ic">🧳</div><small>Packages</small><b id="st4"></b><em>Live on the website</em></div>
  </div>
- <div class="cols">
-  <div class="panel"><div class="ph"><h3>Revenue by destination</h3></div><div class="bars" id="bars"></div></div>
-  <div class="panel"><div class="ph"><h3>Recent activity</h3></div><div class="feed" id="feed"></div></div>
- </div>
+ <div class="panel"><div class="ph"><h3>Revenue by destination</h3></div><div class="bars" id="bars"></div></div>
  <div class="panel"><div class="ph"><h3>Manage packages</h3><div><button class="g" onclick="go('add')">+ Add</button> <button class="r" onclick="delSel()">Delete selected</button></div></div><div class="tw" id="tp1"></div></div>
 </section>
 
@@ -105,6 +112,7 @@ async function load(silent){
    ...d.bookings.map(b=>({t:b.createdAt,i:"🧳",x:`<b>${esc(b.name||b.email)}</b> booked ${esc(b.destination)}`,s:`${esc(b.members)} traveller(s) · ${inr(b.amount)} · ${esc(b.status)}`})),
    ...d.payments.map(p=>({t:p.paidAt,i:"💳",x:`Payment ${inr(p.amount)} from <b>${esc(p.name||p.email)}</b>`,s:esc(p.status)}))
   ].sort((a,b)=>String(b.t||"").localeCompare(String(a.t||""))).slice(0,14);
+  $("nb").textContent=feed.length;$("nb").hidden=!feed.length;
   $("feed").innerHTML=feed.length?feed.map(f=>`<div class="it"><span class="i">${f.i}</span><div>${f.x}<small>${f.s} · ${when(f.t)}</small></div></div>`).join(""):"<p class='empty'>No activity yet.</p>";
 
   const pk=table(["","","Package","Destination","Days","Price","Bookings","Action"],d.packages.map(p=>{
@@ -127,6 +135,8 @@ async function load(silent){
 
   $("upd").textContent="Live · updated "+new Date().toLocaleTimeString();
 }
+function toggleAct(e){e.stopPropagation();$("drop").hidden=!$("drop").hidden}
+document.addEventListener("click",()=>{$("drop").hidden=true});
 async function addPkg(){
   try{
     await call("POST","/admin/package",{name:$("pn").value,destination:$("pd").value,days:$("pdays").value,price:$("pp").value,image:$("pi").value});

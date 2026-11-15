@@ -4,6 +4,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css"></head><body>
 
+<div class="sky" aria-hidden="true">
+ <span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span>
+ <span class="cloud c1">☁️</span><span class="cloud c2">☁️</span><span class="cloud c3">☁️</span>
+ <span class="plane">✈️</span>
+ <span class="fl f1">🌴</span><span class="fl f2">🧳</span><span class="fl f3">🌍</span><span class="fl f4">⛵</span><span class="fl f5">🏔️</span>
+</div>
+
 <nav class="nav solid"><div class="wrap">
  <a class="logo" href="index.html">✈️ Tours &amp; Travels</a>
  <div class="r"><span id="who"></span><button class="btn-o" onclick="logout()">Logout</button></div>
@@ -91,7 +98,7 @@ function render(){
   if(s==="low")view.sort((a,b)=>a.price-b.price);
   else if(s==="high")view.sort((a,b)=>b.price-a.price);
   else if(s==="days")view.sort((a,b)=>a.days-b.days);
-  $("pkgs").innerHTML=view.length?view.map((p,i)=>`<div class="card">
+  $("pkgs").innerHTML=view.length?view.map((p,i)=>`<div class="card" style="animation-delay:${i*70}ms">
     <div class="img"><span>${esc(p.destination)}</span>${p.image?`<img src="${esc(p.image)}" alt="" loading="lazy" onerror="this.remove()">`:""}
      <span class="badge">${esc(p.days)} days</span>
      <div class="pricechip"><small>from</small><b>${inr(p.price)}</b><small>per person</small></div></div>
