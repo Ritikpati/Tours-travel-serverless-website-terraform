@@ -11,6 +11,14 @@
 | `admin-site/dashboard.html`, `style.css` | New **Refunds** tab with Approve / Reject buttons and a pending-count badge. |
 | `user-site/dashboard.html`, `style.css` | New policy text, "Refund processing" / "Refunded" statuses, and the full refund breakdown after cancelling. |
 
+## User site now served through CloudFront (Route 53 -> CloudFront -> private S3)
+| File | Change |
+|---|---|
+| `terraform/main.tf` | User bucket is now **private** (all public access blocked, S3 website hosting and the public policy removed). Added an ACM certificate (us-east-1, DNS-validated through Route 53), a CloudFront distribution for the user site (HTTPS redirect, same OAC as admin), a bucket policy allowing only that distribution, and the Route 53 record now points to CloudFront. Added a second `aws` provider alias `use1` because CloudFront certificates must be in us-east-1. |
+| `terraform/outputs.tf` | `user_url` is now `https://...`; new `user_cloudfront_url`. |
+
+Required: your Route 53 zone must be public and in the same account, and the account must be allowed to request ACM certificates. First apply takes about 5-15 minutes (certificate validation plus CloudFront). The old S3 website endpoint stops working. No pages or workflow changes are needed. Caching is disabled, so uploads show up without invalidations. Run `terraform plan` first: expect the S3 website configuration to be destroyed and the Route 53 record to be changed.
+
 ## You must decide / do
 1. **5-9 day refund %**: the spec says "configured policy". It defaults to 10 to match your current behaviour. Change `refund_5_9_percent` if you want another value.
 2. **Approve a refund only after the money is really sent back** (UPI/bank). Nothing in AWS sends money.

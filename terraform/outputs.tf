@@ -11,8 +11,11 @@ output "admin_bucket" {
   value = aws_s3_bucket.admin.id
 }
 output "user_url" {
-  value = "http://${local.user_bucket}"
+  value = "https://${local.user_bucket}"
 }
 output "admin_url" {
   value = "https://${aws_cloudfront_distribution.admin.domain_name}"
+}
+output "user_cloudfront_url" {
+  value = "https://${aws_cloudfront_distribution.user.domain_name}"
 }

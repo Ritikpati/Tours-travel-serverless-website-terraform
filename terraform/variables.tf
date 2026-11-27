@@ -6,10 +6,10 @@ variable "prefix" {
   default     = "tf"
 }
 variable "zone_name" {
-  default = "293131702654.realhandsonlabs.net "
+  default = "293131702654.realhandsonlabs.net"
 }
 variable "subdomain" {
-  default = "ritiktourswebsite"
+  default = "ritiktourwebsite"
 }
 variable "upi_id" {
   default = "yourupi@bank"
