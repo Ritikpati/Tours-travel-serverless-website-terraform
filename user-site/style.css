@@ -131,7 +131,7 @@ table{width:100%;border-collapse:collapse;font-size:14px}
 th,td{padding:14px 16px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
 th{background:#f0f6fb;color:var(--ocean2);font-weight:600;font-size:13px}
 .st{padding:4px 12px;border-radius:999px;font-size:12px;font-weight:600;background:#e8f0fe;color:var(--ocean2)}
-.st.Confirmed{background:#dcf5e7;color:#0d7a43}.st.Cancelled{background:#fde4e2;color:#b02a20}.st.Pending{background:#fff1d6;color:#9a6200}
+.st.Confirmed{background:#dcf5e7;color:#0d7a43}.st.Cancelled{background:#fde4e2;color:#b02a20}.st.Refund{background:#fff1d6;color:#9a6200}.st.Refunded{background:#e3ecff;color:#2147a8}.st.Pending{background:#fff1d6;color:#9a6200}
 .policy{background:#fff;border-radius:18px;padding:18px 22px;margin-top:20px;font-size:14px;box-shadow:0 8px 30px #0b3d6b14;border-left:5px solid var(--accent)}
 @media(max-width:820px){.menu{display:none}.search{grid-template-columns:1fr}.search div{border:0;border-bottom:1px solid var(--line)}.hero .in{padding-top:90px}}
 

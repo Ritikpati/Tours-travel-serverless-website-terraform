@@ -8,6 +8,7 @@
  <a id="m-pkgs" onclick="go('pkgs')">🧳 Packages</a>
  <a id="m-book" onclick="go('book')">📋 Bookings</a>
  <a id="m-pay" onclick="go('pay')">💳 Payments</a>
+ <a id="m-ref" onclick="go('ref')">↩️ Refunds <span id="rbadge"></span></a>
  <a id="m-users" onclick="go('users')">👥 Users</a>
  <a id="m-add" onclick="go('add')">➕ Add Package</a>
  <a onclick="logout()">🚪 Logout</a>
@@ -43,6 +44,8 @@
  <div class="panel"><div class="ph"><h3>Payments</h3></div><div class="tw" id="tpay"></div></div>
 </section>
 
+<section id="ref" hidden><div class="panel"><div class="ph"><h3>Refund requests</h3></div><div class="tw" id="tref"></div></div></section>
+
 <section id="users" hidden><div class="panel"><div class="ph"><h3>Registered users</h3></div><div class="tw" id="tu"></div></div></section>
 
 <section id="add" hidden>
@@ -74,8 +77,8 @@ async function call(m,p,b){
   if(!r.ok) throw new Error(d.error||d.message||("Error "+r.status));
   return d;
 }
-const SEC=["dash","pkgs","book","pay","users","add"];
-const NAMES={dash:"Dashboard",pkgs:"Packages",book:"Bookings",pay:"Payments",users:"Users",add:"Add Package"};
+const SEC=["dash","pkgs","book","pay","ref","users","add"];
+const NAMES={dash:"Dashboard",pkgs:"Packages",book:"Bookings",pay:"Payments",ref:"Refunds",users:"Users",add:"Add Package"};
 function go(id){
   SEC.forEach(s=>{$(s).hidden=s!==id;const m=$("m-"+s);if(m)m.classList.toggle("on",s===id)});
   $("ttl").textContent=NAMES[id];
@@ -122,10 +125,19 @@ async function load(silent){
     `<tr><td>${esc(p.paymentId)}</td><td>${esc(p.bookingId)}</td><td>${esc(p.name||p.email)}</td><td>${esc(p.destination)}</td><td>${inr(p.amount)}</td><td>${tag(p.status)}</td><td>${p.refund?inr(p.refund):"-"}</td><td>${when(p.paidAt)}</td>
      <td><button class="r" onclick="delPay('${esc(p.paymentId)}')">Delete</button></td></tr>`));
 
+  $("rbadge").textContent=d.totals.pendingRefunds?"("+d.totals.pendingRefunds+")":"";
+  $("tref").innerHTML=table(["Booking","Traveller","Amount","Cancelled on","Refund %","Refund","Fee","Status",""],(d.refunds||[]).map(b=>
+    `<tr><td>${esc(b.bookingId)}</td><td>${esc(b.name||b.email)}</td><td>${inr(b.amount)}</td><td>${when(b.cancelledAt)}</td><td>${esc(b.refundPercent)}%</td><td>${inr(b.refund)}</td><td>${inr(b.cancellationFee||0)}</td><td>${tag(b.payStatus)}</td>
+     <td>${b.payStatus==="REFUND_PENDING"?`<button class="g" onclick="refundAct('approve','${esc(b.bookingId)}')">Approve</button> <button class="r" onclick="refundAct('reject','${esc(b.bookingId)}')">Reject</button>`:""}</td></tr>`));
+
   $("tu").innerHTML=table(["Name","Email","Phone","Bookings","Total spent","Registered"],d.users.map(u=>
     `<tr><td>${esc(u.name)}</td><td>${esc(u.email)}</td><td>${esc(u.phone)}</td><td>${u.bookings}</td><td>${inr(u.spent)}</td><td>${when(u.createdAt)}</td></tr>`));
 
   $("upd").textContent="Live · updated "+new Date().toLocaleTimeString();
+}
+async function refundAct(a,id){
+  if(!confirm((a==="approve"?"Approve":"Reject")+" the refund for "+id+"? Approve only after the money has actually been sent back."))return;
+  try{await call("POST","/admin/refund/"+a,{bookingId:id});load(true)}catch(e){alert(e.message)}
 }
 async function addPkg(){
   try{

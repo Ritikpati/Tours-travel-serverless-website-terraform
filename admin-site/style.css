@@ -50,7 +50,7 @@ th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;le
 tr:hover td{background:#f8faff}
 .thumb{width:46px;height:34px;border-radius:8px;object-fit:cover;background:linear-gradient(135deg,#2a9df4,#1b4f9c);display:block}
 .tag{padding:3px 11px;border-radius:999px;font-size:11.5px;font-weight:600;background:#e8efff;color:#2147a8}
-.tag.PAID,.tag.CONFIRMED,.tag.MANUAL{background:#d9f5e8;color:#0d7a4b}.tag.REFUNDED,.tag.NO_REFUND,.tag.CANCELLED{background:#fde6e7;color:#b02a30}.tag.PENDING_PAYMENT,.tag.PENDING{background:#fff1d6;color:#9a6200}
+.tag.PAID,.tag.CONFIRMED,.tag.MANUAL{background:#d9f5e8;color:#0d7a4b}.tag.REFUND_PENDING,.tag.REFUND_PROCESSING{background:#fff1d6;color:#9a6200}.tag.REFUND_REJECTED{background:#eee;color:#555}.tag.REFUNDED,.tag.NO_REFUND,.tag.CANCELLED{background:#fde6e7;color:#b02a30}.tag.PENDING_PAYMENT,.tag.PENDING{background:#fff1d6;color:#9a6200}
 .bars .rw{display:grid;grid-template-columns:110px 1fr 90px;gap:10px;align-items:center;margin-bottom:12px;font-size:13px}
 .bars .bg{background:#edf1f9;border-radius:999px;height:12px;overflow:hidden}
 .bars .fg{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--blue),var(--purple));transition:width .8s}

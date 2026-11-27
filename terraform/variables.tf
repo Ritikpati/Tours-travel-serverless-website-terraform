@@ -6,10 +6,10 @@ variable "prefix" {
   default     = "tf"
 }
 variable "zone_name" {
-  default = "525259624675.realhandsonlabs.net"
+  default = "293131702654.realhandsonlabs.net "
 }
 variable "subdomain" {
-  default = "tours-tf"
+  default = "ritiktourswebsite"
 }
 variable "upi_id" {
   default = "yourupi@bank"
@@ -21,4 +21,12 @@ variable "admin_password_hash" {
 variable "seed_packages" {
   description = "Add the sample packages on first apply"
   default     = true
+}
+variable "refund_5_9_percent" {
+  description = "Refund % when cancelling 5 to 9 days before travel (10+ days = 80, 2-4 days = 10, 0-1 days = 0)"
+  default     = 10
+}
+variable "payment_mode" {
+  description = "simulation = test payment (no real gateway). Set to live only after a real gateway is integrated."
+  default     = "simulation"
 }

@@ -29,7 +29,7 @@
 
  <section id="bk" hidden>
   <div id="bks"></div>
-  <div class="policy"><b>Cancellation policy:</b> 10 days or more before departure – 80% refund · 5 to 9 days – 10% refund · less than 5 days – no refund.</div>
+  <div class="policy"><b>Cancellation policy:</b> 10 or more days before travel – 80% refund · 5 to 9 days – 10% · 2 to 4 days – 10% · within 1 day – no refund. Refunds are paid after admin approval.</div>
  </section>
 </main>
 
@@ -48,7 +48,7 @@
    <div class="line"><span>Package (per person)</span><span id="l1"></span></div>
    <div class="line"><span id="l2n">Travel</span><span id="l2"></span></div>
    <div class="line t"><span>Total amount</span><span class="amt" id="tot"></span></div>
-   <div class="mini">Cancellation: 10+ days before 80% refund · 5–9 days 10% · under 5 days none.</div>
+   <div class="mini">Cancellation: 10+ days 80% · 5–9 days 10% · 2–4 days 10% · within 1 day none.</div>
    <button class="btn full" onclick="payNow()">Pay with QR</button>
   </div>
  </div>
@@ -133,17 +133,17 @@ async function paid(){
   try{await call("POST","/pay",{bookingId});$("bid").textContent=bookingId;$("s2").hidden=true;$("s3").hidden=false}
   catch(e){alert(e.message)}
 }
-const LBL={CONFIRMED:"Confirmed",CANCELLED:"Cancelled",PENDING_PAYMENT:"Pending"};
+const LBL={CONFIRMED:"Confirmed",CANCELLED:"Cancelled",PENDING_PAYMENT:"Pending",REFUND_PROCESSING:"Refund processing",REFUNDED:"Refunded"};
 async function loadBookings(){
   const b=await call("GET","/mybookings")||[];
   $("bks").innerHTML=b.length?`<div class="tw"><table><tr><th>Booking ID</th><th>Destination</th><th>Travel</th><th>Date</th><th>Members</th><th>Amount</th><th>Status</th><th></th></tr>`+
    b.map(x=>`<tr><td>${esc(x.bookingId)}</td><td>${esc(x.destination)}</td><td>${esc(x.transport)}</td><td>${esc(x.date)}</td><td>${esc(x.members)}</td><td>${inr(x.amount)}</td>
-   <td><span class="st ${LBL[x.status]||""}">${LBL[x.status]||esc(x.status)}</span>${x.status==="CANCELLED"?" Refund "+inr(x.refund):""}</td>
+   <td><span class="st ${LBL[x.status]||""}">${LBL[x.status]||esc(x.status)}</span>${["CANCELLED","REFUND_PROCESSING","REFUNDED"].includes(x.status)&&x.refund?" Refund "+inr(x.refund)+" ("+x.refundPercent+"%, fee "+inr(x.cancellationFee||0)+")":""}</td>
    <td>${x.status==="CONFIRMED"?`<button class="btn-r" onclick="cancelB('${esc(x.bookingId)}')">Cancel</button>`:""}</td></tr>`).join("")+"</table></div>":"<p class='empty'>No bookings yet. Pick a package to get started.</p>";
 }
 async function cancelB(id){
-  if(!confirm("Cancel this booking?\n10+ days before: 80% refund\n5–9 days before: 10% refund\nLess than 5 days: no refund")) return;
-  try{const d=await call("POST","/cancel",{bookingId:id});alert("Cancelled. Refund: "+d.percent+"% = "+inr(d.refund));loadBookings()}
+  if(!confirm("Cancel this booking?\n10+ days before: 80% refund\n5–9 days: 10%\n2–4 days: 10%\nWithin 1 day: no refund")) return;
+  try{const d=await call("POST","/cancel",{bookingId:id});alert("Cancelled.\nBooking amount: "+inr(d.bookingAmount)+"\nRefund: "+d.percent+"% = "+inr(d.refund)+"\nCancellation fee: "+inr(d.cancellationFee)+(d.refund?"\nYour refund will be paid once the admin approves it.":""));loadBookings()}
   catch(e){alert(e.message)}
 }
 loadPkgs();

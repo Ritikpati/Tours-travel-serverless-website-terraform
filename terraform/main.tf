@@ -35,7 +35,7 @@ locals {
     "tours-auth"     = ["POST /register", "POST /login", "POST /admin/login"]
     "tours-packages" = ["GET /packages", "POST /admin/package", "DELETE /admin/package"]
     "tours-booking"  = ["POST /book", "POST /pay", "GET /mybookings", "POST /cancel"]
-    "tours-admin"    = ["GET /admin/summary", "POST /admin/payment", "DELETE /admin/payment"]
+    "tours-admin"    = ["GET /admin/summary", "POST /admin/payment", "DELETE /admin/payment", "POST /admin/refund/approve", "POST /admin/refund/reject"]
   }
   routes = merge([for fn, rs in local.lambdas : { for r in rs : r => fn }]...)
 
@@ -147,6 +147,8 @@ resource "aws_lambda_function" "fn" {
     variables = {
       SECRET = random_password.secret.result
       UPI_ID = var.upi_id
+      REFUND_5_9_PERCENT = tostring(var.refund_5_9_percent)
+      PAYMENT_MODE       = var.payment_mode
     }
   }
 }
